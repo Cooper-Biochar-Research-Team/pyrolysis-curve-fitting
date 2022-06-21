@@ -9,7 +9,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 
 # Load the data from a csv file and import the data into python
 # TODO: Utilize the csvreader to load the columns in the csv file automatically without editing initialization
@@ -103,9 +102,18 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
     plt.legend()
     plt.show()
 
-    # Plot reaction time vs. temperature plot (Figure 4)
-    # lin_reg = LinearRegression()
-    # lin_reg.fit([temp], reaction_time_sets)
+    # Use linear regression model to obtain the trend-line and R-square value
+    lin_reg = LinearRegression()
+    # print(test_temp, reaction_time_sets)
+    lin_reg.fit(test_temp, reaction_time_sets)
+    r2 = np.round(lin_reg.score(test_temp, reaction_time_sets), 4)
+    print(f'\nThe R-square value for the Reaction Time vs. Temperature graph is {r2}')
+    # print(lin_reg.coef_, lin_reg.intercept_)
+    x = np.linspace(350, 850, 1000)
+    y_pred = lin_reg.intercept_ + lin_reg.coef_ * x
+
+    # Plot reaction time vs. temperature plot with the trend-line (Figure 4)
+    plt.plot(x, y_pred, linestyle='--')
     plt.scatter(test_temp, reaction_time_sets)
 
     plt.title("Reaction Time vs. Temperature")
@@ -137,9 +145,10 @@ def main():
     empty_sets = [empty_set_400C, empty_set_500C, empty_set_600C, empty_set_700C, empty_set_800C]
     test_sets = [test_1_400C, test_1_500C, test_2_500C, test_1_600C, test_1_700C, test_1_800C]
     reaction_time_sets = np.zeros(len(test_sets))
+    test_temp = np.zeros(len(test_sets))
 
     # The pyrolysis temperature for each test set
-    test_temp = [400, 500, 500, 600, 700, 800]
+    test_temp = np.array([400, 500, 500, 600, 700, 800]).reshape((-1, 1))
 
     # The following labels will be displayed in the graphs (Figure 2-3)
     empty_set_labels = ['400°C', '500°C', '600°C', '700°C', '800°C']
