@@ -13,7 +13,7 @@ from sklearn.linear_model import LinearRegression
 # Load the data from a csv file and import the data into python
 # TODO: Utilize the csvreader to load the columns in the csv file automatically without editing initialization
 def load_data(data_sets):
-    datafile = 'pyrolysis_python_test_data.csv'
+    datafile = 'small_boat_pyrolysis_python_test_data.csv'
 
     # Set up the csvreader
     with open(datafile, 'r') as csvfile:
@@ -122,8 +122,8 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
     # Use linear regression model to obtain the trend-line and R-square value
     lin_reg = LinearRegression()
     # print(test_temp, reaction_time_sets)
-    lin_reg.fit(test_temp, reaction_time_sets)
-    r2 = np.round(lin_reg.score(test_temp, reaction_time_sets), 4)
+    lin_reg.fit(test_temp.reshape((-1, 1)), reaction_time_sets)
+    r2 = np.round(lin_reg.score(test_temp.reshape((-1, 1)), reaction_time_sets), 4)
     print(f'\nThe R-square value for the Reaction Time vs. Temperature graph is {r2}')
     # print(lin_reg.coef_, lin_reg.intercept_)
     x = np.linspace(350, 850, 1000)
@@ -142,6 +142,7 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
 
 # Note: Update the initializations when new columns are added in the csv file)=
 def main():
+    '''
     # Initialization
     empty_set_400C = []
     test_1_400C = []
@@ -166,12 +167,37 @@ def main():
     test_temp = np.zeros(len(test_sets))
 
     # The pyrolysis temperature for each test set
-    test_temp = np.array([400, 500, 500, 600, 700, 800]).reshape((-1, 1))
+    test_temp = np.array([400, 500, 500, 600, 700, 800])
 
     # The following labels will be displayed in the graphs (Figure 2-3)
     empty_set_labels = ['400°C', '500°C', '600°C', '700°C', '800°C']
     test_set_labels = ['400°C test 1', '500°C test 1', '500°C test 2', '600°C test 1', '700°C test 1',
                        '800°C test 1']
+    '''
+
+    # Initialization
+    empty_set_500C = []
+    empty_set_600C = []
+    empty_set_700C = []
+    empty_set_750C = []
+    empty_set_800C = []
+    test_1_500C = []
+
+    # data_sets includes all data entries, empty_sets includes only empty boat tests,
+    # and test_sets includes only pyrolysis tests
+    data_sets = [empty_set_500C, empty_set_600C, empty_set_700C,
+                 empty_set_750C, empty_set_800C, test_1_500C]
+    empty_sets = [empty_set_500C, empty_set_600C, empty_set_700C, empty_set_750C, empty_set_800C]
+    test_sets = [test_1_500C]
+    # substracted_sets = subtraction(empty_sets, test_sets)
+    reaction_time_sets = np.zeros(len(test_sets))
+
+    # The pyrolysis temperature for each test set
+    test_temp = np.array([500])
+
+    # The following labels will be displayed in the graphs (Figure 2-3)
+    empty_set_labels = ['500°C', '600°C', '700°C', '750°C', '800°C']
+    test_set_labels = ['500°C test 1']
 
     fields = load_data(data_sets)
     generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels)
