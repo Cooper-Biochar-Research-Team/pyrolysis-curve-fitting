@@ -8,26 +8,33 @@ Created on Wed Apr 13 10:33:22 2022
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+#from sklearn.linear_model import LinearRegression
+#from sklearn.metrics import r2_score
 
 # Load the data from a csv file and import the data into python
 # TODO: Utilize the csvreader to load the columns in the csv file automatically without editing initialization
-def load_data(data_sets):
-    datafile = 'pyrolysis_python_test_data.csv'
+
+def load_data():
+    datafile = 'small_boat_pyrolysis_python_test_data.csv'
 
     # Set up the csvreader
-    with open(datafile, 'r') as csvfile:
+    with open(datafile, 'r', encoding='utf-8-sig') as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',')
         fields = next(csvreader)
-
+        data_sets = []
+        for i in range(len(fields)):
+            data_sets.append([])
         # Iterate through the csv file and add the data to data_sets
         for row in csvreader:
-            for i in range(len(data_sets)):
+            for i in range(len(row)):
                 if row[i] != '':
                     row[i] = float(row[i])
                     data_sets[i].append(row[i])
-    return fields
+        data_w_labels = []
+        for i in range(len(fields)):
+            data_w_labels.append(fields[i])
+            data_w_labels.append(data_sets[i])
+    return data_w_labels
 
 # Calculate the integral (area under the curve) using the trapezoidal rule
 def integrate_trapezoidal(h, array, name):
@@ -118,35 +125,43 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
 # Note: Update the initializations when new columns are added in the csv file)=
 def main():
     # Initialization
-    empty_set_400C = []
-    test_1_400C = []
-    empty_set_500C = []
-    test_1_500C = []
-    test_2_500C = []
-    test_1_600C = []
-    empty_set_600C = []
-    empty_set_700C = []
-    test_1_700C = []
-    empty_set_800C = []
-    test_1_800C = []
+    data_w_labels = load_data()
+    data_sets = []
+    fields = []
 
+    for i in range(len(data_w_labels)):
+        if i%2==1:
+            data_sets.append(data_w_labels[i])
+        else:
+            fields.append(data_w_labels[i])
+
+    #TODO: separate and match temperature data
     # data_sets includes all data entries, empty_sets includes only empty boat tests,
     # and test_sets includes only pyrolysis tests
-    data_sets = [empty_set_400C, test_1_400C, empty_set_500C, test_1_500C, test_2_500C, test_1_600C, empty_set_600C,
-                 empty_set_700C, test_1_700C, empty_set_800C, test_1_800C]
-    empty_sets = [empty_set_400C, empty_set_500C, empty_set_600C, empty_set_700C, empty_set_800C]
-    test_sets = [test_1_400C, test_1_500C, test_2_500C, test_1_600C, test_1_700C, test_1_800C]
+    empty_sets = []
+    test_sets = []
+    empty_set_labels = []
+    test_set_labels = []
+    for i in range(len(data_w_labels)):
+        if "empty" in data_w_labels[i]:    #find a way to get rid of the "empty" in each legend entry
+            empty_set_labels.append(data_w_labels[i])
+            empty_sets.append(data_w_labels[i+1])
+        if "test" in data_w_labels[i]:
+            test_set_labels.append(data_w_labels[i])
+            test_sets.append(data_w_labels[i+1])
+
+
     reaction_time_sets = np.zeros(len(test_sets))
 
     # The pyrolysis temperature for each test set
-    test_temp = [400, 500, 500, 600, 700, 800]
+    test_temp = []
+    for j in test_set_labels:
+        for i in range(400,801):
+            if str(i) in j:
+                test_temp.append(i)
 
     # The following labels will be displayed in the graphs (Figure 2-3)
-    empty_set_labels = ['400°C', '500°C', '600°C', '700°C', '800°C']
-    test_set_labels = ['400°C test 1', '500°C test 1', '500°C test 2', '600°C test 1', '700°C test 1',
-                       '800°C test 1']
 
-    fields = load_data(data_sets)
     generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels)
 
     return 0
