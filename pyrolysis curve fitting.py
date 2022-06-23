@@ -40,12 +40,9 @@ def integrate_trapezoidal(h, array, name):
 
 # Calculate the reaction time of each test sets
 def reaction_time(test_i, test_sets, name):
-    # Initialization
-    start_time = 0
-    end_time = 420
-
     # Find the start time of the reaction
     for time_i in range(len(test_sets[test_i])):
+        start_time = 0
         # When the temperature difference is higher than 2°C in 1s for the first time,
         # the current time is considered as the start time
         if np.abs(test_sets[test_i][time_i] - test_sets[test_i][time_i + 1]) > 2:
@@ -56,6 +53,7 @@ def reaction_time(test_i, test_sets, name):
 
     # Find the end time of the reaction
     for time_i in range(100, len(test_sets[test_i])-1):
+        end_time = 420
         # When the temperature difference is lower than 0.15°C in 5s after the major temperature change,
         # the current time is considered as the end time
         if np.abs(test_sets[test_i][time_i] - test_sets[test_i][time_i-5]) <= 0.15:
@@ -67,6 +65,25 @@ def reaction_time(test_i, test_sets, name):
     reaction_time = end_time - start_time
     print(f'The reaction time is {reaction_time}s')
     return reaction_time
+
+'''
+# Subtract the empty sets from the data sets (WIP)
+# Issue: the start of temp drop of empty set and data set might not be the same  
+def subtraction(empty, test):
+    subtracted = []
+    for subtract_i in range(len(test)):
+        if subtract_i < 2:
+            for num1, num2 in zip(test[subtract_i], empty[subtract_i]):
+                num = num1 - num2
+                print(num)
+                subtracted[subtract_i].append(num)
+        else:
+            for num1, num2 in zip(test[subtract_i], empty[subtract_i - 1]):
+                num = num1 - num2
+                subtracted[subtract_i].append(num)
+    print(subtracted)
+    return subtracted
+'''
 
 # Generate the text results and plot the graphs
 def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels):
@@ -144,6 +161,7 @@ def main():
                  empty_set_700C, test_1_700C, empty_set_800C, test_1_800C]
     empty_sets = [empty_set_400C, empty_set_500C, empty_set_600C, empty_set_700C, empty_set_800C]
     test_sets = [test_1_400C, test_1_500C, test_2_500C, test_1_600C, test_1_700C, test_1_800C]
+    # substracted_sets = subtraction(empty_sets, test_sets)
     reaction_time_sets = np.zeros(len(test_sets))
     test_temp = np.zeros(len(test_sets))
 
