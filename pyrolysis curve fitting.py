@@ -126,7 +126,7 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
     r2 = np.round(lin_reg.score(test_temp.reshape((-1, 1)), reaction_time_sets), 4)
     print(f'\nThe R-square value for the Reaction Time vs. Temperature graph is {r2}')
     # print(lin_reg.coef_, lin_reg.intercept_)
-    x = np.linspace(350, 850, 1000)
+    x = np.linspace(450, 850, 1000)
     y_pred = lin_reg.intercept_ + lin_reg.coef_ * x
 
     # Plot reaction time vs. temperature plot with the trend-line (Figure 4)
@@ -182,22 +182,25 @@ def main():
     empty_set_750C = []
     empty_set_800C = []
     test_1_500C = []
+    test_1_600C = []
+    test_1_700C = []
+    test_1_750C = []
 
     # data_sets includes all data entries, empty_sets includes only empty boat tests,
     # and test_sets includes only pyrolysis tests
-    data_sets = [empty_set_500C, empty_set_600C, empty_set_700C,
-                 empty_set_750C, empty_set_800C, test_1_500C]
+    data_sets = [empty_set_500C, empty_set_600C, empty_set_700C, empty_set_750C,
+                 empty_set_800C, test_1_500C, test_1_600C, test_1_700C, test_1_750C]
     empty_sets = [empty_set_500C, empty_set_600C, empty_set_700C, empty_set_750C, empty_set_800C]
-    test_sets = [test_1_500C]
+    test_sets = [test_1_500C, test_1_600C, test_1_700C, test_1_750C]
     # substracted_sets = subtraction(empty_sets, test_sets)
     reaction_time_sets = np.zeros(len(test_sets))
 
     # The pyrolysis temperature for each test set
-    test_temp = np.array([500])
+    test_temp = np.array([500, 600, 700, 750])
 
     # The following labels will be displayed in the graphs (Figure 2-3)
     empty_set_labels = ['500°C', '600°C', '700°C', '750°C', '800°C']
-    test_set_labels = ['500°C test 1']
+    test_set_labels = ['500°C test 1', '600°C test 1', '700°C test 1', '750°C test 1']
 
     fields = load_data(data_sets)
     generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels)
