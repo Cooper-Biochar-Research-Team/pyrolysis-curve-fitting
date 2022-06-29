@@ -37,6 +37,7 @@ def integrate_trapezoidal(h, array, name):
         y = (y_a + y_b) / 2
         integral += y * h
     print(f'The integral of {name} is {integral: .4}')
+    return integral
 
 # Calculate the reaction time of each test sets
 def reaction_time(test_i, test_sets, name):
@@ -52,7 +53,7 @@ def reaction_time(test_i, test_sets, name):
             break
 
     # Find the end time of the reaction
-    for time_i in range(100, len(test_sets[test_i])-1):
+    for time_i in range(80, len(test_sets[test_i])-1):
         end_time = 420
         # When the temperature difference is lower than 0.15°C in 5s after the major temperature change,
         # the current time is considered as the end time
@@ -86,12 +87,35 @@ def subtraction(empty, test):
 '''
 
 # Generate the text results and plot the graphs
-def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels):
+def generate_results(fields, data_sets, empty_sets, test_sets, density, heat_capacity, sample_mass,
+                     reaction_time_sets, test_temp, empty_set_labels, test_set_labels):
+    # Initialization
+    delta_T_empty_sets = []
+    delta_T_test_sets = []
+    enthalpy_sets = []
+
     print('Integration results:')
-    # For each column in the csv file, plot the time-temperature curves (Figure 1) and calculate enthalpy
+    # For each column in the csv file, plot the time-temperature curves (Figure 1)
     for i in range(len(data_sets)):
         plt.plot(data_sets[i], label=fields[i])
-        integrate_trapezoidal(1, data_sets[i], fields[i])
+        # Calculate delta T and sort them into empty/test sets
+        delta_T = integrate_trapezoidal(1, data_sets[i], fields[i])
+        if i < 5:
+            delta_T_empty_sets.append(delta_T)
+        else:
+            delta_T_test_sets.append(delta_T)
+
+    # Calculate the enthalpy in kJ/kg using formula dQ = mCpdT
+    # Mass flow rate and heat capacity of nitrogen, and mass of the pyrolysis samples are used
+    for i in range(len(test_sets)):
+        mass_flow_rate = 200 * (density[i] * 10 ** -6) / 60  # in kg/s
+        enthalpy = mass_flow_rate * heat_capacity[i] * (delta_T_test_sets[i] - delta_T_empty_sets[i]) * 1000  # in J
+        sample_enthalpy = enthalpy / sample_mass[i]  # in kJ/kg
+        enthalpy_sets.append(sample_enthalpy)
+
+    # print(delta_T_test_sets)
+    # print(delta_T_empty_sets)
+    # print(enthalpy_sets)
 
     plt.title("Temperature vs. Time (All data)")
     plt.xlabel("Time (s)")
@@ -138,9 +162,25 @@ def generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_set
     plt.ylabel("Reaction Time (s)")
     plt.show()
 
+    # Plot delta T vs. temperature plot (Figure 5)
+    plt.scatter(test_temp, delta_T_test_sets)
+
+    plt.title("Delta T vs. Temperature (Test Sets)")
+    plt.xlabel("Temperature (°C)")
+    plt.ylabel("delta T")
+    plt.show()
+
+    # Plot enthalpy vs. temperature plot (Figure 6)
+    plt.scatter(test_temp, enthalpy_sets)
+
+    plt.title("Enthalpy vs. Temperature")
+    plt.xlabel("Temperature (°C)")
+    plt.ylabel("Enthalpy (kJ/kg)")
+    plt.show()
+
     return 0
 
-# Note: Update the initializations when new columns are added in the csv file)=
+# Note: Update the initializations when new columns are added in the csv file
 def main():
     '''
     # Initialization
@@ -195,15 +235,19 @@ def main():
     # substracted_sets = subtraction(empty_sets, test_sets)
     reaction_time_sets = np.zeros(len(test_sets))
 
-    # The pyrolysis temperature for each test set
+    # The pyrolysis parameters for each test set
     test_temp = np.array([500, 600, 700, 750])
+    density = [0.437, 0.384, 0.341, 0.324]  # in kg/m3
+    heat_capacity = [1.056, 1.075, 1.098, 1.110]  # in kJ/kg-K
+    sample_mass = [0.0069, 0.0078, 0.0078, 0.0081]  # in g
 
     # The following labels will be displayed in the graphs (Figure 2-3)
     empty_set_labels = ['500°C', '600°C', '700°C', '750°C', '800°C']
     test_set_labels = ['500°C test 1', '600°C test 1', '700°C test 1', '750°C test 1']
 
     fields = load_data(data_sets)
-    generate_results(fields, data_sets, empty_sets, test_sets, reaction_time_sets, test_temp, empty_set_labels, test_set_labels)
+    generate_results(fields, data_sets, empty_sets, test_sets, density, heat_capacity, sample_mass,
+                     reaction_time_sets, test_temp, empty_set_labels, test_set_labels)
 
     return 0
 
